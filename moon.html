@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Hyperspace Effect</title>
+    <style>
+        body {
+            margin: 0;
+        }
+        
+        .lessgooo {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #00000000;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="lessgooo" id ="lessgooo">lessgooo</div>
+    <script src="https://threejs.org/build/three.min.js"></script>
+    <script>
+        // Set up the scene, camera, and renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create a starfield background
+        const starGeometry = new THREE.BufferGeometry();
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff });
+
+        const starVertices = [];
+        for (let i = 0; i < 10000; i++) {
+            const x = (Math.random() - 0.5) * 2000;
+            const y = (Math.random() - 0.5) * 2000;
+            const z = (Math.random() - 0.5) * 2000;
+            starVertices.push(x, y, z);
+        }
+
+        starGeometry.setAttribute(
+            "position",
+            new THREE.Float32BufferAttribute(starVertices, 3)
+        );
+
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+
+        // Initialize the camera position
+        camera.position.z = 0;
+
+        // Create a hyperspace tunnel
+        const tunnelGeometry = new THREE.TorusGeometry(10, 3, 16, 100);
+        const tunnelMaterial = new THREE.MeshBasicMaterial({
+            color: 0x00ff00,
+            wireframe: true,
+        });
+        const tunnel = new THREE.Mesh(tunnelGeometry, tunnelMaterial);
+        scene.add(tunnel);
+
+        // Load the moon texture image
+        const textureLoader = new THREE.TextureLoader();
+        const moonTexture = textureLoader.load('moontexture.jpg'); // Replace 'path_to_moon_texture_image.jpg' with your image path
+
+        // Create a moon with texture
+        const moonGeometry = new THREE.SphereGeometry(1, 32, 32);
+        const moonMaterial = new THREE.MeshBasicMaterial({ map: moonTexture });
+        const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+        moon.position.set(0, 0, -15); // Position the moon in the center of the tunnel
+        scene.add(moon);
+
+        // Animation function
+        const animate = () => {
+            requestAnimationFrame(animate);
+
+            // Rotate the tunnel
+            tunnel.rotation.x += 0.005;
+            tunnel.rotation.y += 0.005;
+
+            // Rotate the moon around the center
+            moon.rotation.x += 0.01;
+            moon.rotation.y += 0.01;
+
+            // Move the camera forward
+            camera.position.z -= 0.1;
+
+            renderer.render(scene, camera);
+        };
+
+        // Handle window resize
+        window.addEventListener("resize", () => {
+            const newWidth = window.innerWidth;
+            const newHeight = window.innerHeight;
+
+            camera.aspect = newWidth / newHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(newWidth, newHeight);
+        });
+
+        // Start the animation
+        animate();
+        
+        var lessgoooButton = document.getElementById("lessgooo");
+
+        lessgoooButton.addEventListener("click", function () {
+            window.location.href = "particle.html"; // Replace with your page URL
+        });
+
+    </script>
+</body>
+
+</html>

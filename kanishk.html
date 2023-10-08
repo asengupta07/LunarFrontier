@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.122.0/examples/js/controls/OrbitControls.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Orbitron">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            vertical-align: bottom;
+        }
+
+        header {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            background-color: #fff;
+            color: #000;
+            padding: 30px;
+            font-size: 25px;
+        }
+
+        .blast-off {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #00000000;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <header>Luna</header> -->
+    <div id="canvas-container"></div>
+    <div class="blast-off" id="blast-off">Blast Off</div>
+    <script>
+        var textureURL = "moontexture.jpg";
+        var worldURL = "new.jpg";
+
+        var scene = new THREE.Scene();
+
+        var camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+
+        const renderer = new THREE.WebGLRenderer();
+
+        var controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enablePan = false;
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        var geometry = new THREE.SphereGeometry(2, 60, 60);
+
+        var textureLoader = new THREE.TextureLoader();
+        var texture = textureLoader.load(textureURL);
+        var worldTexture = textureLoader.load(worldURL);
+
+        // Adjust the texture mapping to fit the moon correctly
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(4, 2); // Adjust these values to fit your texture
+
+        var material = new THREE.MeshPhongMaterial({
+            color: 0xffffff,
+            map: texture,
+            reflectivity: 0,
+            shininess: 0
+        });
+
+        var moon = new THREE.Mesh(geometry, material);
+
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(-100, 10, 50);
+        scene.add(light);
+
+        hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.1);
+        hemiLight.color.setHSL(0.6, 0.5, 0.6);
+        hemiLight.groundColor.setHSL(0.095, 1, 0.75);
+        hemiLight.position.set(0, 0, 0);
+        scene.add(hemiLight);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        var worldGeometry = new THREE.SphereGeometry(1000, 60, 60);
+        var worldMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            map: worldTexture,
+            side: THREE.BackSide
+        });
+        var world = new THREE.Mesh(worldGeometry, worldMaterial);
+        scene.add(world);
+
+        scene.add(moon);
+        camera.position.z = 5;
+
+        moon.rotation.x = 3.1415 * 0.02;
+        moon.rotation.y = 3.1415 * 1.54;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            moon.rotation.y += 0.002;
+            moon.rotation.x += 0.005;
+            world.rotation.y += 0.004;
+            world.rotation.x += 0.003;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.addEventListener("resize", onResize, false);
+
+        // "Blast Off" functionality
+        var blastOffButton = document.getElementById("blast-off");
+
+        blastOffButton.addEventListener("click", function () {
+            window.location.href = "moon.html"; // Replace with your page URL
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="model-container"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Create a scene
+        const scene = new THREE.Scene();
+      
+        // Create a camera
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 2;
+      
+        // Create a renderer
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('model-container').appendChild(renderer.domElement);
+      
+        // Load the GLTF model
+        const loader = new THREE.GLTFLoader();
+        loader.load('scene.gltf', (gltf) => {
+          // Add the loaded model to the scene
+          scene.add(gltf.scene);
+        });
+      
+        // Add a directional light to the scene
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        scene.add(light);
+      
+        // Animation loop
+        const animate = () => {
+          requestAnimationFrame(animate);
+          renderer.render(scene, camera);
+        };
+      
+        animate();
+      </script>
+      
+</body>
+</html>

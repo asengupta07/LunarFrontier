@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moon Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.122.0/examples/js/controls/OrbitControls.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Orbitron">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            vertical-align: bottom;
+        }
+
+        header {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            background-color: #fff;
+            color: #000;
+            padding: 30px;
+            font-size: 25px;
+        }
+
+        .blast-off {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background-color: #00000000;
+            border-radius: 5px;
+        }
+
+        #container {
+            position: absolute;
+        }
+
+        #buttons {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+
+        select {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <div id="buttons">
+        <div>
+            <label for="moonTexture">Moon Texture:</label>
+            <select id="moonTexture">
+                <option value="moontexture.png">Texture 1</option>
+                <option value="moon5.png">Texture 1</option>
+                <option value="moon6.png">Texture 2</option>
+                <option value="moon7.png">Texture 3</option>
+                <option value="moon8.png">Texture 4</option>
+                <!-- Add more texture options as needed -->
+            </select>
+        </div>
+         <!-- <div>
+            <label for="background">Background:</label>
+            <select id="background">
+                <option value="new.png">Background 1</option> -->
+                <!--<option value="bg1.png">Background 1</option>
+                <option value="bg2.png">Background 2</option>
+                <option value="bg3.png">Background 3</option>
+                <option value="bg4.png">Background 4</option>
+                 Add more background options as needed 
+            </select>
+        </div> -->
+        <div>
+            <label for="year">Year:</label>
+            <input type="number" id="year" value="2023">
+        </div>
+        <div>
+            <label for="day">Day:</label>
+            <input type="number" id="day" value="1">
+        </div>
+        <button id="submit">Submit</button>
+    </div>
+    <script>
+        var scene = new THREE.Scene();
+
+        var camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+
+        const renderer = new THREE.WebGLRenderer();
+
+        var controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enablePan = false;
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        var geometry = new THREE.SphereGeometry(2, 60, 60);
+
+        // Get initial texture and background values
+        var initialTextureURL = document.getElementById("moonTexture").value;
+        var initialBackgroundURL = "bg1.png";
+
+        var textureLoader = new THREE.TextureLoader();
+        var texture = textureLoader.load(initialTextureURL);
+        var worldTexture = textureLoader.load(initialBackgroundURL);
+
+        // Adjust the texture mapping to fit the moon correctly
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(4, 2);
+
+        var material = new THREE.MeshPhongMaterial({
+            color: 0xffffff,
+            map: texture,
+            reflectivity: 0,
+            shininess: 0
+        });
+
+        var moon = new THREE.Mesh(geometry, material);
+
+        const light = new THREE.DirectionalLight(0xffffff, 1);
+        light.position.set(-100, 10, 50);
+        scene.add(light);
+
+        hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 0.1);
+        hemiLight.color.setHSL(0.6, 0.5, 0.6);
+        hemiLight.groundColor.setHSL(0.095, 1, 0.75);
+        hemiLight.position.set(0, 0, 0);
+        scene.add(hemiLight);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        var worldGeometry = new THREE.SphereGeometry(1000, 60, 60);
+        var worldMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            map: worldTexture,
+            side: THREE.BackSide
+        });
+        var world = new THREE.Mesh(worldGeometry, worldMaterial);
+        scene.add(world);
+
+        scene.add(moon);
+        camera.position.z = 5;
+
+        moon.rotation.x = 3.1415 * 0.02;
+        moon.rotation.y = 3.1415 * 1.54;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            // moon.rotation.y += 0.002;
+            // moon.rotation.x += 0.005;
+            // world.rotation.y += 0.004;
+            // world.rotation.x += 0.003;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        function onResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.addEventListener("resize", onResize, false);
+
+        // Update the moon texture and background based on user selection
+        document.getElementById("moonTexture").addEventListener("change", function () {
+            var selectedTextureURL = this.value;
+            texture = textureLoader.load(selectedTextureURL);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(4, 2);
+            material.map = texture;
+            material.needsUpdate = true;
+        });
+
+        // var selectedBackgroundURL = "new.png";
+        //     worldTexture = textureLoader.load(selectedBackgroundURL);
+        //     worldMaterial.map = worldTexture;
+
+        // document.getElementById("background").addEventListener("change", function () {
+        //     var selectedBackgroundURL = this.value;
+        //     worldTexture = textureLoader.load(selectedBackgroundURL);
+        //     worldMaterial.map = worldTexture;
+        //     worldMaterial.needsUpdate = true;
+        // });
+
+        // Initialize a variable to store moon data
+        let moonData = [];
+
+        // Load the CSV data
+        fetch('nakamura.csv')
+            .then((response) => response.text())
+            .then((data) => {
+                // Parse the CSV data
+                const rows = data.split('\n');
+                for (let i = 1; i < rows.length; i++) {
+                    const columns = rows[i].split(',');
+                    if (columns.length === 5) {
+                        const year = parseInt(columns[0]);
+                        const day = parseInt(columns[1]);
+                        const latitude = parseFloat(columns[2]);
+                        const longitude = parseFloat(columns[3]);
+                        const magnitude = parseFloat(columns[4]);
+                        moonData.push({ year, day, latitude, longitude, magnitude });
+                    }
+                }
+            })
+            .catch((error) => console.error('Error loading CSV:', error));
+
+        // Function to map the pointer on the moon
+        function mapPointerOnMoon(year, day) {
+            const moonDatum = moonData.find((data) => data.year === year && data.day === day);
+
+            if (moonDatum) {
+                const { latitude, longitude, magnitude } = moonDatum;
+
+                // Calculate the position on the sphere
+                const x = (longitude / 180) * Math.PI;
+                const y = (-latitude / 180) * Math.PI;
+
+                // Position the pointer on the moon
+                const pointer = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.05 * magnitude, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: 0xFF0000 })
+                );
+                pointer.position.setFromSphericalCoords(2, x, y);
+                scene.add(pointer);
+            } else {
+                console.error('Data not found for the selected year and day.');
+            }
+        }
+
+        // Event listener for the "Submit" button
+        document.getElementById('submit').addEventListener('click', function () {
+            const selectedYear = parseInt(document.getElementById('year').value);
+            const selectedDay = parseInt(document.getElementById('day').value);
+
+            // Remove existing pointers on the moon
+            scene.children.forEach((child) => {
+                if (child instanceof THREE.Mesh && child.material.color.getHex() === 0xFF0000) {
+                    scene.remove(child);
+                }
+            });
+
+            // Map the pointer on the moon based on user input
+            mapPointerOnMoon(selectedYear, selectedDay);
+        });
+
+        // // "Blast Off" functionality
+        // var blastOffButton = document.getElementById("submit");
+
+        // blastOffButton.addEventListener("click", function () {
+        //     var selectedYear = document.getElementById("year").value;
+        //     var selectedDay = document.getElementById("day").value;
+        //     window.location.href = "moon.html?year=" + selectedYear + "&day=" + selectedDay; // Redirect to the moon page with selected year and day
+        // });
+    </script>
+</body>
+
+</html>
